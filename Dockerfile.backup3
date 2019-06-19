@@ -1,0 +1,51 @@
+FROM ubuntu:xenial
+
+ENV APT="apt-get -y"
+ENV USER="radio"
+
+USER root
+RUN ${APT} update && ${APT} upgrade
+RUN DEBIAN_FRONTEND=noninteractive ${APT} install \
+                    software-properties-common \
+                    python-software-properties \
+                    git \
+                    wget \
+                    dpkg-dev \
+                    debhelper \
+                    sudo
+
+RUN DEBIAN_FRONTEND=noninteractive ${APT} install libuhd-dev || $(APT) update --fix-missing?
+RUN adduser --disabled-password ${USER}
+RUN adduser ${USER} sudo
+ADD /sudoers.txt /etc/sudoers
+RUN chmod 440 /etc/sudoers
+
+USER ${USER}
+WORKDIR /home/${USER}
+RUN git clone https://github.com/RangeNetworks/dev.git
+WORKDIR dev
+RUN ./clone.sh
+RUN sed -i '/`date +"%Y-%m-%d--%H-%M-%S"`/c\BUILDNAME=BUILDS' build.sh
+RUN ./build.sh SDR1 libcoredumper
+RUN ./build.sh SDR1 liba53
+RUN ./build.sh SDR1 system-config
+RUN ./build.sh B210 openbts
+USER root
+WORKDIR BUILDS
+RUN ${APT} install -f
+RUN echo "resolvconf resolvconf/linkify-resolvconf boolean false" | debconf-set-selections
+RUN dpkg -i *.deb || \
+    DEBIAN_FRONTEND=noninteractive ${APT} install -f || \
+    dpkg --force-confnew -i range-configs_5.1-master_all.deb
+
+USER ${USER}
+WORKDIR /home/${USER}
+RUN git clone https://github.com/nadiia-kotelnikova/openbts_systemd_scripts.git
+USER root
+RUN cp /home/${USER}/openbts_systemd_scripts/systemd/openbts.service /etc/systemd/system
+WORKDIR /OpenBTS
+
+RUN ${APT} install openssh-server
+RUN sed -i 's/^Port 22$/Port 39775/' /etc/ssh/sshd_config
+RUN sed -i 's/^PermitEmptyPasswords no$/PermitEmptyPasswords yes/' /etc/ssh/sshd_config
+CMD ["/sbin/init"]

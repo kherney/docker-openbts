@@ -1,0 +1,38 @@
+FROM ubuntu:xenial
+
+ENV APT="apt-get -y"
+ENV USER="radio"
+USER root
+RUN ${APT} update && ${APT} upgrade
+RUN echo "resolvconf resolvconf/linkify-resolvconf boolean false" | debconf-set-selections
+RUN DEBIAN_FRONTEND=noninteractive ${APT} install \
+                    software-properties-common \
+                    python-software-properties \
+                    git \
+                    wget \
+                    dpkg-dev \
+                    debhelper \
+                    sudo \
+                    autoconf
+RUN DEBIAN_FRONTEND=noninteractive add-apt-repository ppa:git-core/ppa
+RUN ${APT} update || true
+
+RUN adduser --disabled-password ${USER}
+RUN adduser ${USER} sudo
+ADD /sudoers.txt /etc/sudoers
+RUN chmod 440 /etc/sudoers
+
+
+USER ${USER}
+WORKDIR /home/${USER}
+RUN git clone https://github.com/RangeNetworks/dev.git
+WORKDIR dev
+RUN ./clone.sh
+RUN sed -i '/`date +"%Y-%m-%d--%H-%M-%S"`/c\BUILDNAME=BUILDS' build.sh
+RUN ./build.sh SDR1 libcoredumper
+RUN ./build.sh SDR1 liba53
+RUN ./build.sh SDR1 system-config
+RUN ./build.sh B210 openbts
+
+
+CMD ["/sbin/init"]

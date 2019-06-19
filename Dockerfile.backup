@@ -1,0 +1,31 @@
+FROM ubuntu:xenial
+
+ENV APT="apt-get -y"
+
+USER root
+RUN ${APT} update && ${APT} upgrade
+RUN ${APT} install  --no-install-recommends apt-utils
+RUN echo "resolvconf resolvconf/linkify-resolvconf boolean false" | debconf-set-selections
+RUN DEBIAN_FRONTEND=noninteractive ${APT} install software-properties-common python-software-properties git wget dpkg-dev debhelper
+RUN DEBIAN_FRONTEND=noninteractive add-apt-repository ppa:git-core/ppa
+RUN ${APT} update || true
+RUN ${APT} install sudo
+RUN adduser --disabled-password kherney
+RUN adduser kherney sudo
+
+
+USER kherney
+WORKDIR /home/kherney
+RUN git clone https://github.com/RangeNetworks/dev.git 
+WORKDIR dev
+RUN ./clone.sh
+RUN sed -i '/`date +"%Y-%m-%d--%H-%M-%S"`/c\BUILDNAME=BUILDS' build.sh
+
+
+USER root
+ADD /sudoers.txt /etc/sudoers
+RUN chmod 440 /etc/sudoers
+USER kherney
+
+RUN ./build.sh SDR1 libcoredumper
+CMD ["/sbin/init"]
