@@ -1,0 +1,17 @@
+version: '3'
+services:
+  openBTS:
+    stdin_open: true
+    tty: true
+    privileged: true
+    container_name: openbts
+    image: 'openbts-n210:1.0'
+    network_mode: host
+    volumes:
+      - '/openbts_data_g:/etc/OpenBTS'
+    ports:
+      - "49300:49300"
+volumes:
+  openbts_data_g:
+    driver: local
+
