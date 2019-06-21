@@ -1,14 +1,11 @@
 # OpenBTS docker N210
-Image  requires [Node.js](https://nodejs.org/) v4+ to run.
+Docker building over 18.09.3.
 WiridLab Resource. OpenBTS components.Ubuntu 16.04 LTS (xenial) with USRP N210.
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
-  - Type some Markdown on the left
-  - See HTML in the right
-  - Magic
+  - [OpenBTS DB SQLite][db] configuration
 
 ## Building / Pulling docker image 
-Markdown is a lightweight markup language based on the formatting conventions that people naturally use in email.  As [John Gruber] writes on the [Markdown site][df1]
 
 Install the dependencies and devDependencies and start the server.
 This will create the dillinger image and pull in the necessary dependencies. Be sure to swap out `${package.json.version}` with the actual version of Dillinger.
@@ -95,7 +92,8 @@ This is part of [WiridLab][wiridlab] project. [Wiridlab][web-wirid] is a Researc
 WiridLab - GISSIC -Telecom engineering -Militar Nueva Granda University
 
 
-   [bts]:       <https://hub.docker.com/r/kherney/openbts-n210>  
+   [bts]:       <https://hub.docker.com/r/kherney/openbts-n210>
+   [db]:        <>
    [wiridlab]:  <https://gitlab.com/wirid-lab>
    [web-wirid]: <http://wirid-lab.umng.edu.co/?lang=en>
    [yml]:       <https://github.com/kherney/docker-openbts-fullest/blob/master/openbts-config.yml>
