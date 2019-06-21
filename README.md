@@ -7,26 +7,18 @@ WiridLab Resource. OpenBTS components.Ubuntu 16.04 LTS (xenial) with USRP N210.
 
 ## Building / Pulling docker image 
 
-Install the dependencies and devDependencies and start the server.
-This will create the dillinger image and pull in the necessary dependencies. Be sure to swap out `${package.json.version}` with the actual version of Dillinger.
-
+In the building way, this will build a image from Dockerfile. If tried to build another image, you must specify a number version, like 1.1 or 2.0  
 ```sh
-$ cd dillinger
-$ npm install -d
-$ node app
+$ docker build -t openbts-n210:TAG-VERSION
+```
+In the pulling way, it will create the openbts image and pull in the necessary dependencies. Be sure to choose out with the actual version of openbts-n210.
+
+```
+$ docker pull kherney/openbts-n210::TAG-VERSION
 ```
 
 ## Create/run container
-
-
-```sh
-$ cd dillinger
-$ npm install -d
-$ node app
-```
-```sh
-docker run -d -p 8000:8080 --restart="always" <youruser>/dillinger:${package.json.version}
-```
+Docker composer is used to running and defining  multi-container. Composer is a nice feature to configure your service service docker applications. This services is configured in a yml file configuration.  
 
 #### Composer configuration  file 
 [openbts_config.yml][yml]
@@ -37,47 +29,65 @@ services:
     stdin_open: true
     tty: true
     privileged: true
-    container_name: openbts
-    image: 'openbts-n210:1.0'
+    container_name: NAME_CONTAINER
+    image: 'NAME_IMAGE'
     network_mode: host
     volumes:
-      - '/openbts_data_g:/etc/OpenBTS'
+      - '/NAMEDIR_PATH_HOST_FILE_SQL_DB_OPENBTS:/etc/OpenBTS'
     ports:
       - "49300:49300"
 volumes:
-  openbts_data_g:
+  NAME_DIR:
     driver: local
 ```
-Dillinger is currently extended with the following plugins. Instructions on how to use them in your own application are linked below.
+The yml file is currently builded with the following commands. Instructions on how to use them in your own application are linked below.
 
-| Plugin | README |
+| Command | Description |
 | ------ | ------ |
-| Dropbox | [plugins/dropbox/README.md][PlDb] |
-| Github | [plugins/github/README.md][PlGh] |
-| Google Drive | [plugins/googledrive/README.md][PlGd] |
-| OneDrive | [plugins/onedrive/README.md][PlOd] |
-| Medium | [plugins/medium/README.md][PlMe] |
-| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
+| stdin_open | [plugins/dropbox/README.md][PlDb] |
+| tty | [plugins/github/README.md][PlGh] |
+| privileged | [plugins/googledrive/README.md][PlGd] |
+| container_name | [plugins/onedrive/README.md][PlOd] |
+| image | [plugins/medium/README.md][PlMe] |
+| network_mode | [plugins/googleanalytics/README.md][PlGa] |
+| vulumes | [plugins/googleanalytics/README.md][PlGa] |
+| ports | [plugins/googleanalytics/README.md][PlGa] |
 
-Once done, run the Docker image and map the port to whatever you wish on your host. In this example, we simply map port 8000 of the host to port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
+After compose your yml configuration, you must  path your yml file with docker-compose command.
+```sh
+$ 
+$ docker-compose  -f YOUR_CONF_FILE.yml up -d
+```
+This command is another way to create/run a container from iamge. Don't care the way, the result is the same. 
+```sh
+docker run -d -p 8000:8080 --restart="always" <youruser>/dillinger:${package.json.version}
+```
+Once done, the container created take the network host. (or whatever open port on the host, also this ports will be exposed in the container). By default, openbts not runs once you launch the container. You must run it manually. 
 
-## Run/stop container
+## Initial OpenBTS configuration
+
+When OpenBTS is launched, it creates a sql DBs in /etc/OpenBTS. If this files exists, OpenBTS run over these files configuration. For this reason we launch OpenBTS manually.  
+
 ```sh
 cd dillinger
 docker build -t joemccann/dillinger:${package.json.version} .
 ```
-## Manage container
-```sh
-$ cd dillinger
-$ npm install -d
-$ node app
-```
-### Common commands
+
+## Common commands
+
+### Run/stop container
 
 ```sh
-$ cd dillinger
-$ npm install -d
-$ node app
+$ docker stop NAME_CONATINER
+$ docker run NAME_CONTAINER
+```
+
+
+```sh
+$ docker exec -it openbts /bin/bash
+$ cp -r /openbts_data/. /openbts_data_g
+$ docker build -t openbts-n210:1.0 
+$ docker container rm openbts-docker
 ```
 
 ## Authors and Contributors
